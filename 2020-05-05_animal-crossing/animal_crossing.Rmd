@@ -106,10 +106,34 @@ items %>% ggplot() +
 
 # Most Expensive Items
 
+This was the original code in my tweet:
+
 ```{r}
 library(gt)
 
-most_expensive <- function(category_name=NULL){
+ items %>% 
+  top_n(10, buy_value) %>%
+  arrange(desc(buy_value)) %>%
+  select(name, sell_value, buy_value, category, image=image_url) %>%
+  gt() %>%
+   text_transform(
+    locations = cells_body(vars(image)),
+    fn = function(x) {
+      web_image(
+        url = x,
+        height = 50
+      )
+    }
+  )
+  
+
+```
+
+Here's a function.
+
+```{r}
+
+most_expensive <- function(category_name=NULL, price_category=buy_value){
   
   if(!is.null(category_name)){
     items <- items %>%
@@ -117,8 +141,8 @@ most_expensive <- function(category_name=NULL){
   }
   
   items %>% 
-  top_n(10, sell_value) %>%
-  arrange(desc(sell_value)) %>%
+  top_n(10, {{price_category}}) %>%
+  arrange(desc({{price_category}})) %>%
   select(name, sell_value, buy_value, category, image=image_url) %>%
   gt() %>%
    text_transform(
@@ -132,12 +156,9 @@ most_expensive <- function(category_name=NULL){
   )
   
 }
-
-
-most_expensive("Hats")
 ```
 
-
+# Reproducing the above table
 
 ```{r}
 most_expensive()
@@ -149,7 +170,6 @@ most_expensive()
 most_expensive("Furniture")
 ```
 
-
 # Most Expensive Hats
 
 ```{r}
@@ -157,14 +177,10 @@ library(gt)
 most_expensive("Hats")
 ```
 
-```{r}
-most_expensive("Flooring")
-
-```
-
+# Most Expensive Fossils
 
 ```{r}
-most_expensive("Fossils")
+most_expensive("Fossils", sell_value)
 ```
 
 # Priceless Items by Category
@@ -176,14 +192,6 @@ items %>%
   theme(axis.text.x = element_text(angle=90))
 ```
 
-
-# What was your question?
-
-Given your inital exploration of the data, what was the question you wanted to answer?
-
-# What were your findings?
-
-Put your findings and your visualization code here.
 
 ```{r}
 library(ggalluvial)
